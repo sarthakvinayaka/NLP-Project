@@ -1,85 +1,76 @@
-# [Deep Learning] IMDB-Movie-reviews-sentiment-classification
+# IMDB-Movie-reviews-sentiment-classification
 
-This is a mini project in [Deep Learning Nanodegree](https://www.udacity.com/course/deep-learning-nanodegree--nd101) at Udacity. 
-Codes including data cleaning the data were provided by Udacity.
 
-In this project, I implemented 2 layer neural network using __Keras__.
+In this project, I implemented Long short-term memory (LSTM) is an artificial recurrent neural network (RNN) using __Keras__.
 
 ## Dataset
 
 The data set contains 50,000 movie reviews from Internet Movie Database (IMDB) labeled whether they are positive or negative.
 Each review is preprocessed to be encoded as a sequence of word indexes.
-Each word is mapped into an integer that stands for how frequently the word is used.
 For instance, let there be a sentence "To be or not to be".
 The mapping of the words are as follows:
 
-- to: 5
-- be: 8
-- or: 21
-- not: 3
+- to: 2
+- be: 6
+- or: 19
+- not: 10
 
-The above mapping means that 'not' is the top 3rd frequently used word whereas 'or' is the top 21th frequently used word.
-The above sentence "To be or not to be" is encoded as `[5, 8, 21, 3, 5, 8]`.
+The above sentence "To be or not to be" is encoded as `[2, 6, 19, 10, 2, 6]`.
 
-## Data Cleaning
+## Data Processing
 
-The integers in `[5, 8, 21, 3, 5, 8]` should be treated as categorical variables. 
-Which means, I need to prepare the data in one-hot encoding.
-The feature set will contain information on whether a specific word is used or not.
-To clarify, the vector `[5, 8, 21, 3, 5, 8]` processed into `(0,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1)`.
-The processed vectors shows us that 'not' is in the sentence (column 3), 'to' is also in the sentence (column 5) etc.
+The data is processed by converting in integer sequence using tokenizer and word_index function and then padded and truncated for eg lets say that if the review is of 10 words and another is of 12 words now to make sure that the length will remain same we have use padding and truncating and fixed the length of the training and test sequences which will be explained in notebook.
 
-When constructing the one-hot encoding, I chose the top 1000 frequently used words. Hence, the size of the feature would be 1000.
+Example of a training example how it is converted in integer from text.
 
-## Divice the datasets
-
-I first divided the training set and test set in a proportion of 50:50.
-Then, I used 80% of the training set when training the model and utilized the remaining 20% as the validation set.
-
-- Training set: 20,000 reviews
-- Validation set: 5,000 reviews
-- Test set: 25,000 reviews
+```
+[59, 12, 14, 35, 439, 400, 18, 174, 29, 1, 9, 33, 1378, 3401, 42, 496, 1, 197, 25, 88, 156, 19, 12, 211, 340, 29, 70, 248, 213, 9, 486, 62, 70, 88, 116, 99, 24, 5740, 12, 3317, 657, 777, 12, 18, 7, 35, 406, 8228, 178, 2477, 426, 2, 92, 1253, 140, 72, 149, 55, 2, 1, 7525, 72, 229, 70, 2962, 16, 1, 2880, 1, 1, 1506, 4998, 3, 40, 3947, 119, 1608, 17, 3401, 14, 163, 19, 4, 1253, 927, 7986, 9, 4, 18, 13, 14, 4200, 5, 102, 148, 1237, 11, 240, 692, 13, 44, 25, 101, 39, 12, 7232, 1, 39, 1378, 1, 52, 409, 11, 99, 1214, 874, 145, 10]
+b"This was an absolutely terrible movie. Don't be lured in by Christopher Walken or Michael Ironside. Both are great actors, but this must simply be their worst role in history. Even their great acting could not redeem this movie's ridiculous storyline. This movie is an early nineties US propaganda piece. The most pathetic scenes were those when the Columbian rebels were making their cases for revolutions. Maria Conchita Alonso appeared phony, and her pseudo-love affair with Walken was nothing but a pathetic emotional plug in a movie that was devoid of any real meaning. I am disappointed that there are movies like this, ruining actor's like Christopher Walken's good name. I could barely sit through it."
+```
 
 ## Building the model
 
-The model has 2 layers (1 hidden layer) with 128 nodes.
-I set dropout rate = 0.5 to prevent the model from overfitting the training set.
-I used `relu` for the activation on the hidden layer, and `softmax` on the output layer.
-Details are in the `main.py`.
+We have used LSTM algorith which will be explained in notebook.
+The model has 7 layers (6 hidden layer) .
+I used `relu` for the activation on the hidden layer, and `sigmoid` on the output layer.
+Details are in the `notebook`.
 Here's the summary of my model.
 
 ```
+Model: "sequential"
 _________________________________________________________________
-Layer (type)                 Output Shape              Param #
+Layer (type)                 Output Shape              Param #   
 =================================================================
-dense_1 (Dense)              (None, 128)               128128
+embedding (Embedding)        (None, 120, 16)           160000    
 _________________________________________________________________
-dropout_1 (Dropout)          (None, 128)               0
+bidirectional (Bidirectional (None, 64)                12544     
 _________________________________________________________________
-dense_2 (Dense)              (None, 2)                 258
+dense (Dense)                (None, 6)                 390       
+_________________________________________________________________
+dense_1 (Dense)              (None, 1)                 7         
 =================================================================
-Total params: 128,386
-Trainable params: 128,386
+Total params: 172,941
+Trainable params: 172,941
 Non-trainable params: 0
+_________________________________________________________________
 ```
 
-## Training the model
+## Training and validating the model
 
-I trained the model using __Mini-batch gradient descent__ for only 2 epochs with batch size of 100.
-Here's result of the training for the two epochs. 
-
-```
-Epoch 1/2
-20000/20000 [==============================] - 1s 57us/step - loss: 0.4404 - acc: 0.7925 - val_loss: 0.3359 - val_acc: 0.8576
-Epoch 2/2
-20000/20000 [==============================] - 1s 47us/step - loss: 0.3257 - acc: 0.8600 - val_loss: 0.3294 - val_acc: 0.8568
-```
-
-## Testing the model
-
-I tested the model on the remaining 25,000 movie reviews. I got 85.82\% accuracy in prediction.
+I trained the model  for only 5 epochs.
+Here's result of the training for the five epochs. 
 
 ```
-25000/25000 [==============================] - 1s 37us/step
-Testing Accuracy: 0.85824
+Epoch 1/5
+782/782 [==============================] - 75s 95ms/step - loss: 0.1147 - accuracy: 0.9614 - val_loss: 0.4856 - val_accuracy: 0.8281
+Epoch 2/5
+782/782 [==============================] - 71s 91ms/step - loss: 0.0820 - accuracy: 0.9712 - val_loss: 0.6072 - val_accuracy: 0.8244
+Epoch 3/5
+782/782 [==============================] - 73s 93ms/step - loss: 0.0579 - accuracy: 0.9804 - val_loss: 0.6630 - val_accuracy: 0.8083
+Epoch 4/5
+782/782 [==============================] - 70s 90ms/step - loss: 0.0397 - accuracy: 0.9871 - val_loss: 0.7662 - val_accuracy: 0.8167
+Epoch 5/5
+782/782 [==============================] - 69s 88ms/step - loss: 0.0313 - accuracy: 0.9900 - val_loss: 0.8376 - val_accuracy: 0.8178
 ```
+
+
